@@ -1,21 +1,8 @@
--- =============================================================
--- snowflake_setup.sql
--- =============================================================
--- Run this script once as ACCOUNTADMIN to set up:
---   1. Database + schema structure
---   2. Virtual warehouses (cost-optimised sizing)
---   3. RBAC roles and grants (data governance)
---   4. RAW staging tables (landed by Glue / Snowpipe)
---   5. Star schema: FACT_ORDERS + 4 dimension tables
---   6. Snowpipe for auto-ingest from S3
--- =============================================================
 
 USE ROLE ACCOUNTADMIN;
 
-
--- ─────────────────────────────────────────────
 -- 1. DATABASE & SCHEMA STRUCTURE
--- ─────────────────────────────────────────────
+
 CREATE DATABASE IF NOT EXISTS ECOMMERCE_DW
     COMMENT = 'E-commerce analytics data warehouse — Charmy Raj capstone project';
 
@@ -31,10 +18,8 @@ CREATE SCHEMA IF NOT EXISTS ECOMMERCE_DW.STAGING
 CREATE SCHEMA IF NOT EXISTS ECOMMERCE_DW.ANALYTICS
     COMMENT = 'Star schema fact and dimension tables. Source of truth for Power BI.';
 
-
--- ─────────────────────────────────────────────
 -- 2. VIRTUAL WAREHOUSES (cost-optimised)
--- ─────────────────────────────────────────────
+
 -- Separate warehouses isolate compute costs per workload type.
 
 -- ETL warehouse: used by Glue + Snowpipe + dbt runs
@@ -54,7 +39,7 @@ CREATE WAREHOUSE IF NOT EXISTS REPORTING_WH
     COMMENT = 'BI reporting and ad-hoc analyst queries';
 
 
--- ─────────────────────────────────────────────
+
 -- 3. RBAC ROLES & GRANTS  (data governance)
 -- ─────────────────────────────────────────────
 -- Role hierarchy:
@@ -115,10 +100,8 @@ GRANT USAGE ON WAREHOUSE REPORTING_WH TO ROLE ANALYST_ROLE;
 -- GRANT ROLE TRANSFORMER  TO USER dbt_transform;
 -- GRANT ROLE ANALYST_ROLE TO USER powerbi_reader;
 
-
--- ─────────────────────────────────────────────
 -- 4. RAW STAGING TABLES
--- ─────────────────────────────────────────────
+
 USE ROLE LOADER_ROLE;
 USE SCHEMA ECOMMERCE_DW.RAW;
 USE WAREHOUSE COMPUTE_WH;
@@ -174,10 +157,8 @@ CREATE TABLE IF NOT EXISTS RAW_WEB_EVENTS (
     _loaded_at  TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
 );
 
-
--- ─────────────────────────────────────────────
 -- 5. STAR SCHEMA  (ANALYTICS layer)
--- ─────────────────────────────────────────────
+
 USE ROLE TRANSFORMER;
 USE SCHEMA ECOMMERCE_DW.ANALYTICS;
 
@@ -283,9 +264,8 @@ CREATE TABLE IF NOT EXISTS FACT_ORDERS (
 );
 
 
--- ─────────────────────────────────────────────
 -- 6. SNOWPIPE  (auto-ingest from S3)
--- ─────────────────────────────────────────────
+
 USE ROLE ACCOUNTADMIN;
 
 -- External stage pointing to your S3 bucket
@@ -314,7 +294,7 @@ ON_ERROR = 'CONTINUE';
 -- Copy the SQS ARN from the notification_channel column and add it as an
 -- S3 event notification on your bucket (All ObjectCreate events, prefix: raw/ecommerce/orders/).
 
--- ── VERIFICATION QUERIES ──────────────────────────────────────
+-- VERIFICATION QUERIES
 -- Run these after loading data to verify row counts and schema integrity.
 
 -- SELECT 'RAW_ORDERS'    AS tbl, COUNT(*) AS n FROM ECOMMERCE_DW.RAW.RAW_ORDERS
