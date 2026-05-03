@@ -1,15 +1,3 @@
-"""
-generate_sample_data.py
------------------------
-Generates realistic e-commerce sample data files for the pipeline:
-  - orders.csv          (10,000 rows)
-  - products.csv        (500 rows)
-  - customers.json      (2,000 rows)
-  - web_events.json     (50,000 rows)
-
-Run: python generate_sample_data.py
-Output files land in the same directory.
-"""
 
 import csv
 import json
@@ -19,7 +7,7 @@ from datetime import datetime, timedelta
 
 random.seed(42)
 
-# ── CONFIG ──────────────────────────────────────────────────
+
 N_CUSTOMERS  = 2_000
 N_PRODUCTS   = 500
 N_ORDERS     = 10_000
@@ -38,7 +26,7 @@ def rand_date(start=START_DATE, end=END_DATE):
     delta = end - start
     return (start + timedelta(seconds=random.randint(0, int(delta.total_seconds())))).isoformat()
 
-# ── CUSTOMERS ───────────────────────────────────────────────
+#  CUSTOMERS 
 customers = []
 for i in range(1, N_CUSTOMERS + 1):
     customers.append({
@@ -56,7 +44,7 @@ with open("customers.json", "w") as f:
     json.dump(customers, f, indent=2)
 print(f"✓ customers.json  ({N_CUSTOMERS} records)")
 
-# ── PRODUCTS ────────────────────────────────────────────────
+# PRODUCTS 
 products = []
 for i in range(1, N_PRODUCTS + 1):
     category   = random.choice(CATEGORIES)
@@ -78,7 +66,7 @@ with open("products.csv", "w", newline="") as f:
     writer.writerows(products)
 print(f"✓ products.csv    ({N_PRODUCTS} records)")
 
-# ── ORDERS ──────────────────────────────────────────────────
+# ORDERS
 orders = []
 for i in range(1, N_ORDERS + 1):
     product   = random.choice(products)
@@ -106,7 +94,7 @@ with open("orders.csv", "w", newline="") as f:
     writer.writerows(orders)
 print(f"✓ orders.csv      ({N_ORDERS} records)")
 
-# ── WEB EVENTS ──────────────────────────────────────────────
+# WEB EVENTS
 web_events = []
 for i in range(1, N_WEB_EVENTS + 1):
     customer = random.choice(customers)
