@@ -1,8 +1,8 @@
 -- models/staging/stg_orders.sql
--- ─────────────────────────────────────────────────────────────
+
 -- Staging layer: type-cast, deduplicate, and filter RAW_ORDERS.
 -- Materialised as a VIEW — no storage cost, always fresh.
--- ─────────────────────────────────────────────────────────────
+
 
 WITH source AS (
     SELECT * FROM {{ source('raw', 'RAW_ORDERS') }}
