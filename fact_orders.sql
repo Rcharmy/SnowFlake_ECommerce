@@ -1,8 +1,3 @@
--- models/marts/fact_orders.sql
--- ─────────────────────────────────────────────────────────────
--- Central fact table. Grain: one row per order.
--- Joins all dimensions, computes gross_margin.
--- ─────────────────────────────────────────────────────────────
 
 WITH orders AS (
     SELECT * FROM {{ ref('stg_orders') }}
