@@ -1,8 +1,4 @@
--- models/marts/mart_revenue_kpis.sql
--- ─────────────────────────────────────────────────────────────
--- Monthly revenue KPI rollup. Powers the Power BI dashboard.
--- KPIs: total revenue, AOV, order count, gross margin %, new customers
--- ─────────────────────────────────────────────────────────────
+
 
 WITH fact AS (
     SELECT * FROM {{ ref('fact_orders') }}
