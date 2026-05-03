@@ -1,26 +1,3 @@
-"""
-glue_etl_job.py
----------------
-AWS Glue PySpark ELT job.
-Reads raw files from S3, applies type casting + null handling,
-then bulk-loads into Snowflake RAW schema via the Snowflake Spark connector.
-
-Deploy this script to AWS Glue as a PySpark job.
-Required Glue job parameters (set in AWS Console or via CLI):
-  --S3_BUCKET         your-s3-bucket-name
-  --S3_PREFIX         raw/ecommerce/
-  --SF_ACCOUNT        your_account.snowflakecomputing.com
-  --SF_DATABASE       ECOMMERCE_DW
-  --SF_WAREHOUSE      COMPUTE_WH
-  --SF_ROLE           LOADER_ROLE
-  --SF_USER           glue_loader
-  --SF_PASSWORD       (use Glue job parameter encryption)
-
-Snowflake connection uses the official Spark connector JAR — add it as
-a dependent JAR in your Glue job configuration:
-  net.snowflake:spark-snowflake_2.12:2.12.0-spark_3.3
-  net.snowflake:snowflake-jdbc:3.14.1
-"""
 
 import sys
 from awsglue.utils import getResolvedOptions
@@ -33,7 +10,7 @@ from pyspark.sql.types import (
     IntegerType, BooleanType, TimestampType
 )
 
-# ── INIT ─────────────────────────────────────────────────────
+#  INIT
 args = getResolvedOptions(sys.argv, [
     "JOB_NAME", "S3_BUCKET", "S3_PREFIX",
     "SF_ACCOUNT", "SF_DATABASE", "SF_WAREHOUSE",
@@ -70,7 +47,7 @@ def write_to_snowflake(df, table_name, mode="append"):
     print(f"  → Loaded {df.count():,} rows into RAW.{table_name}")
 
 
-# ── 1. ORDERS ────────────────────────────────────────────────
+# 1. ORDERS
 print("Processing orders.csv ...")
 orders_schema = StructType([
     StructField("order_id",        StringType()),
@@ -97,7 +74,7 @@ orders_clean = (
 write_to_snowflake(orders_clean, "RAW_ORDERS")
 
 
-# ── 2. PRODUCTS ──────────────────────────────────────────────
+#  2. PRODUCTS
 print("Processing products.csv ...")
 products_schema = StructType([
     StructField("product_id",    StringType()),
@@ -120,7 +97,7 @@ products_clean = (
 write_to_snowflake(products_clean, "RAW_PRODUCTS")
 
 
-# ── 3. CUSTOMERS (JSON) ──────────────────────────────────────
+# 3. CUSTOMERS (JSON)
 print("Processing customers.json ...")
 customers_raw = spark.read.json(f"{S3_BASE}customers.json")
 customers_clean = (
@@ -137,7 +114,7 @@ customers_clean = (
 write_to_snowflake(customers_clean, "RAW_CUSTOMERS")
 
 
-# ── 4. WEB EVENTS (JSON) ─────────────────────────────────────
+# 4. WEB EVENTS (JSON)
 print("Processing web_events.json ...")
 events_raw = spark.read.json(f"{S3_BASE}web_events.json")
 events_clean = (
@@ -151,6 +128,6 @@ events_clean = (
 write_to_snowflake(events_clean, "RAW_WEB_EVENTS")
 
 
-# ── DONE ──────────────────────────────────────────────────────
+# DONE
 job.commit()
 print("Glue ELT job completed successfully.")
